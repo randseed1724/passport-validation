@@ -42,6 +42,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 // ... and BEFORE our routes
 
+// This middleware sets the user variable for all views
+// (only if logged in)
+//   user: req.user     for all renders!
+app.use((req, res, next) => {
+  if (req.user) {
+    res.locals.user = req.user;
+  }
+
+  next();
+});
+
+
+// PASSPORT GOES THROUGH THIS
+  // 1. Our form
+  // 2. LocalStrategy callback
+  // 3. (if successful) passport.serializeUser()
+
 
 // Determines WHAT TO SAVE in the session (what to put in the box)
 // (called when you log in)
@@ -70,32 +87,59 @@ passport.deserializeUser((userId, cb) => {
   });
 });
 
+
 const LocalStrategy = require('passport-local').Strategy;
+// The same as:
+// const passportLocal = require('passport-local');
+// const LocalStrategy = passportLocal.Strategy;
 
 const bcrypt = require('bcrypt');
 
-passport.use(new LocalStrategy(
-  { },
+
+passport.use( new LocalStrategy(
+  // 1st arg -> options to customize LocalStrategy
+  {
+      // <input name="loginUsername">
+    usernameField: 'loginUsername',
+      // <input name="loginPassword">
+    passwordField: 'loginPassword'
+  },
+
+  // 2nd arg -> callback for the logic that validates the login
   (loginUsername, loginPassword, next) => {
-   User.findOne({username: loginUsername },
-     (err, theUser ) => {
-       if (err) {
-         next(err);
-         return;
-       }
-       if (!theUser) {
-         next(null, false);
-         return;
-       }
-      if (bcrypt.compareSync(loginPassword, theUser.encryotedPassword)) {
+    User.findOne(
+      { username: loginUsername },
+
+      (err, theUser) => {
+        // Tell Passport if there was an error (nothing we can do)
+        if (err) {
+          next(err);
+          return;
+        }
+
+        // Tell Passport if there is no user with given username
+        if (!theUser) {
+            //       false in 2nd arg means "Log in failed!"
+            //         |
           next(null, false);
           return;
-       }
-     }
-   );
-  }
-));
+        }
 
+        // Tell Passport if the passwords don't match
+        if (!bcrypt.compareSync(loginPassword, theUser.encryptedPassword)) {
+            //       false in 2nd arg means "Log in failed!"
+            //         |
+          next(null, false);
+          return;
+        }
+
+        // Give Passport the user's details (SUCCESS!)
+        next(null, theUser);
+          // -> this user goes to passport.serializeUser()
+      }
+    );
+  }
+) );
 
 
 
@@ -107,6 +151,9 @@ app.use('/', index);
 
 const myAuthRoutes = require('./routes/auth-routes.js');
 app.use('/', myAuthRoutes);
+
+const myUserRoutes = require('./routes/user-routes.js');
+app.use('/', myUserRoutes);
 // ----------------------------------------------------------
 
 

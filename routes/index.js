@@ -3,7 +3,20 @@ const router  = express.Router();
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  res.render('index');
+  console.log('Home --------------^-^-----------');
+
+  console.log('SESSION (from express-session middleware)', req.session);
+
+  console.log('USER (from passport middleware)', req.user);
+  console.log(req.user);
+
+
+
+
+
+  res.render('index', {
+    user: req.user
+  });
 });
 
 module.exports = router;
