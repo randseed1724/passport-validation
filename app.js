@@ -70,6 +70,34 @@ passport.deserializeUser((userId, cb) => {
   });
 });
 
+const LocalStrategy = require('passport-local').Strategy;
+
+const bcrypt = require('bcrypt');
+
+passport.use(new LocalStrategy(
+  { },
+  (loginUsername, loginPassword, next) => {
+   User.findOne({username: loginUsername },
+     (err, theUser ) => {
+       if (err) {
+         next(err);
+         return;
+       }
+       if (!theUser) {
+         next(null, false);
+         return;
+       }
+      if (bcrypt.compareSync(loginPassword, theUser.encryotedPassword)) {
+          next(null, false);
+          return;
+       }
+     }
+   );
+  }
+));
+
+
+
 
 
 // OUR ROUTES HERE
