@@ -3,19 +3,26 @@ const router  = express.Router();
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  console.log('Home --------------^-^-----------');
+  console.log('HOME ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
 
-  console.log('SESSION (from express-session middleware)', req.session);
+  console.log('SESSION (from express-session middleware)');
+  console.log(req.session);
 
-  console.log('USER (from passport middleware)', req.user);
+  console.log('\n');
+  console.log('USER (from Passport middleware)');
   console.log(req.user);
 
-
-
-
+  // Render a completely different view for logged in users
+  // if (req.user) {
+  //   res.render('logged-in-home.ejs');
+  // } else {
+  //   res.render('index');
+  // }
 
   res.render('index', {
-    user: req.user
+    // user: req.user,
+    successMessage: req.flash('successfulSignup'),
+    passportSuccess: req.flash('success')
   });
 });
 

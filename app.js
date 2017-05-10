@@ -8,6 +8,7 @@ const layouts      = require('express-ejs-layouts');
 const mongoose     = require('mongoose');
 const session      = require('express-session');
 const passport     = require('passport');
+const flash        = require('connect-flash');
 
 
 mongoose.connect('mongodb://localhost/passport-app');
@@ -36,6 +37,7 @@ app.use( session({
   resave: true,
   saveUninitialized: true
 }) );
+app.use(flash());
 
 // These need to come AFTER the session middleware
 app.use(passport.initialize());
@@ -47,6 +49,7 @@ app.use(passport.session());
 //   user: req.user     for all renders!
 app.use((req, res, next) => {
   if (req.user) {
+    // Creates a variable "user" for views
     res.locals.user = req.user;
   }
 
@@ -121,7 +124,9 @@ passport.use( new LocalStrategy(
         if (!theUser) {
             //       false in 2nd arg means "Log in failed!"
             //         |
-          next(null, false);
+          next(null, false, {
+            message: 'Wrong username, buddy.'
+          });
           return;
         }
 
@@ -129,12 +134,16 @@ passport.use( new LocalStrategy(
         if (!bcrypt.compareSync(loginPassword, theUser.encryptedPassword)) {
             //       false in 2nd arg means "Log in failed!"
             //         |
-          next(null, false);
+          next(null, false, {
+            message: "Wrong password, friend"
+          });
           return;
         }
 
         // Give Passport the user's details (SUCCESS!)
-        next(null, theUser);
+        next(null, theUser, {
+          message: `Login for ${theUser.username} successful.`
+        });
           // -> this user goes to passport.serializeUser()
       }
     );
