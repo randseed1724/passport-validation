@@ -21,9 +21,9 @@ router.get('/', (req, res, next) => {
 
   res.render('index', {
     // user: req.user,
-    successMessage: req.flash('successfulSignup'),
-    passportSuccess: req.flash('success')
-  });
+    successMessage: req.flash('success')
+      //                          |
+  }); //        default success message key from Passport
 });
 
 module.exports = router;

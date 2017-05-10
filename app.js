@@ -124,25 +124,24 @@ passport.use( new LocalStrategy(
         if (!theUser) {
             //       false in 2nd arg means "Log in failed!"
             //         |
-          next(null, false, {
-            message: 'Wrong username, buddy.'
-          });
-          return;
-        }
+          next(null, false, { message: 'Wrong username, buddy. 😓' });
+          return;  //   |
+        }          //   v
+                   // message -> req.flash('error')
 
         // Tell Passport if the passwords don't match
         if (!bcrypt.compareSync(loginPassword, theUser.encryptedPassword)) {
             //       false in 2nd arg means "Log in failed!"
             //         |
-          next(null, false, {
-            message: "Wrong password, friend"
-          });
-          return;
-        }
+          next(null, false, { message: 'Wrong password, friend. 😓' });
+          return;  //   |
+        }          //   v
+                   // message -> req.flash('error')
 
         // Give Passport the user's details (SUCCESS!)
         next(null, theUser, {
-          message: `Login for ${theUser.username} successful.`
+          // message -> req.flash('success')
+          message: `Login for ${theUser.username} successful. 🤣`
         });
           // -> this user goes to passport.serializeUser()
       }
