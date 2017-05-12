@@ -6,6 +6,7 @@
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const FbStrategy = require('passport-facebook').Strategy;
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const LocalStrategy = require('passport-local').Strategy;
 // The same as:
 // const passportLocal = require('passport-local');
@@ -43,8 +44,8 @@ passport.deserializeUser((userId, cb) => {
 
 passport.use( new FbStrategy(
   {
-    clientID: 'your facebook app id',          // Facebook App ID
-    clientSecret: 'your facebook app secret',  // Facebook App Secret
+    clientID: 'your Facebook app id',          // Facebook App ID
+    clientSecret: 'your Facebook app secret',  // Facebook App Secret
     callbackURL: '/auth/facebook/callback'
   },           //            |
                // address for a route in our app
@@ -74,6 +75,60 @@ passport.use( new FbStrategy(
           facebookID: profile.id,
           name: profile.displayName
         });
+
+        theUser.save((err) => {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          // This logs in the newly registered user
+          done(null, theUser);
+        });
+      }
+    );
+  }
+) );
+
+
+passport.use( new GoogleStrategy(
+  {
+    clientID: 'your Google client ID',
+    clientSecret: 'your Google client secret',
+    callbackURL: '/auth/google/callback'
+  },           //            |
+               // address for a route in our app
+  (accessToken, refreshToken, profile, done) => {
+    console.log('');
+    console.log('GOOGLE PROFILE ~~~~~~~~~~~~~~~~~~~~~');
+    console.log(profile);
+    console.log('');
+
+    User.findOne(
+      { googleID: profile.id },
+
+      (err, foundUser) => {
+        if (err) {
+          done(err);
+          return;
+        }
+
+        // If user is already registered, just log them in!
+        if (foundUser) {
+          done(null, foundUser);
+          return;
+        }
+
+        // Register the user if they are not registered
+        const theUser = new User({
+          googleID: profile.id,
+          name: profile.displayName
+        });
+
+        // If name is empty, save the email as the "name".
+        if (!theUser.name) {
+          theUser.name = profile.emails[0].value;
+        }
 
         theUser.save((err) => {
           if (err) {
