@@ -44,8 +44,8 @@ passport.deserializeUser((userId, cb) => {
 
 passport.use( new FbStrategy(
   {
-    clientID: 'your Facebook app id',          // Facebook App ID
-    clientSecret: 'your Facebook app secret',  // Facebook App Secret
+    clientID: process.env.FB_APP_ID,          // Facebook App ID
+    clientSecret: process.env.FB_APP_SECRET,  // Facebook App Secret
     callbackURL: '/auth/facebook/callback'
   },           //            |
                // address for a route in our app
@@ -93,8 +93,8 @@ passport.use( new FbStrategy(
 
 passport.use( new GoogleStrategy(
   {
-    clientID: 'your Google client ID',
-    clientSecret: 'your Google client secret',
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/auth/google/callback'
   },           //            |
                // address for a route in our app
@@ -179,7 +179,7 @@ passport.use( new LocalStrategy(
         if (!bcrypt.compareSync(loginPassword, theUser.encryptedPassword)) {
             //       false in 2nd arg means "Log in failed!"
             //         |
-          next(null, false, { message: 'Wrong password, friend. 😓' });
+          next(null, false, { message: 'Wrong password, friend. ' });
           return;  //   |
         }          //   v
                    // message -> req.flash('error')
@@ -187,7 +187,7 @@ passport.use( new LocalStrategy(
         // Give Passport the user's details (SUCCESS!)
         next(null, theUser, {
           // message -> req.flash('success')
-          message: `Login for ${theUser.username} successful. 🤣`
+          message: `Login for ${theUser.username} successful. `
         });
           // -> this user goes to passport.serializeUser()
       }
